@@ -6,16 +6,6 @@ from playhouse.pool import PooledMySQLDatabase
 
 database_proxy = DatabaseProxy()
 
-class ForceCheckedPooledMySQLDatabase(PooledMySQLDatabase):
-    def _is_closed(self, conn):
-        try:
-            conn.ping(False)
-            if not conn._sock: return True
-        except:
-            return True
-        else:
-            return False
-
 def get_RedisConnection(redis_server, redis_port=6379, redis_password=None, db=0):
     #redis连接单节点与集群不一样
     if isinstance(redis_server, basestring):
@@ -33,6 +23,6 @@ def get_RedisConnection(redis_server, redis_port=6379, redis_password=None, db=0
     raise Exception('no redis_server')
 
 def get_MysqlConnection(db_host, db_port, db_user, db_password, db_name, max_connection=100, stale_timeout=60):
-    database_proxy.initialize(ForceCheckedPooledMySQLDatabase(host=db_host, port=db_port, user=db_user, password=db_password,
+    database_proxy.initialize(PooledMySQLDatabase(host=db_host, port=db_port, user=db_user, password=db_password,
         database=db_name, max_connections=max_connection, stale_timeout=stale_timeout))
     return database_proxy
